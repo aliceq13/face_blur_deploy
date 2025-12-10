@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(docker-compose exec:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(timeout 600 docker-compose up:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(git lfs track:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(git push:*)",
+      "Bash(git lfs ls-files:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

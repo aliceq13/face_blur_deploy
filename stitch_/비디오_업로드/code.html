@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>비디오 업로드 및 처리</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#4A90E2",
+            "background-light": "#F8F9FA",
+            "background-dark": "#161022",
+            "text-light": "#333333",
+            "text-dark": "#EAEAEA",
+            "secondary-light": "#7F8C8D",
+            "secondary-dark": "#A0AEC0",
+            "border-light": "#E2E8F0",
+            "border-dark": "#433b54",
+            "surface-light": "#FFFFFF",
+            "surface-dark": "#1D162C",
+            "success": "#2ECC71",
+            "error": "#E74C3C"
+          },
+          fontFamily: {
+            "display": ["Spline Sans", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<div class="flex h-full grow flex-col">
+<div class="flex flex-1 justify-center py-10 px-4 sm:px-6 lg:px-8">
+<div class="flex w-full max-w-3xl flex-col">
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between gap-3 p-4">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-4xl font-bold tracking-tight">비디오 업로드 및 처리</p>
+<p class="text-secondary-light dark:text-secondary-dark text-base font-normal">파일을 업로드하여 처리를 시작하세요</p>
+</div>
+</div>
+<!-- Empty State / Upload Area -->
+<div class="flex flex-col p-4">
+<div class="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-border-light dark:border-border-dark px-6 py-14 transition-colors hover:border-primary/80 hover:bg-primary/5 dark:hover:bg-primary/10">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-5xl text-secondary-light dark:text-secondary-dark">cloud_upload</span>
+<p class="text-lg font-bold">이곳에 비디오 파일을 드래그 앤 드롭하세요</p>
+<p class="text-sm font-normal">또는</p>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold shadow-sm transition-colors hover:bg-primary/90">
+<span class="truncate">컴퓨터에서 파일 선택</span>
+</button>
+</div>
+<p class="text-secondary-light dark:text-secondary-dark text-sm font-normal pt-3 text-center">최대 파일 크기: 2GB, 지원 포맷: MP4, MOV, AVI</p>
+</div>
+<!-- Spacer -->
+<div class="my-4 border-t border-border-light dark:border-border-dark"></div>
+<!-- Progress Bar Section -->
+<div class="flex flex-col gap-8 p-4">
+<!-- Uploading State -->
+<div class="flex flex-col gap-3">
+<div class="flex flex-wrap gap-2 justify-between">
+<p class="text-base font-medium">my_awesome_video.mp4 (150MB)</p>
+<p class="text-sm font-normal text-secondary-light dark:text-secondary-dark">55%</p>
+</div>
+<div class="w-full rounded-full bg-slate-200 dark:bg-border-dark">
+<div class="h-2 rounded-full bg-primary" style="width: 55%;"></div>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-sm font-normal text-secondary-light dark:text-secondary-dark">업로드 중...</p>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-3 bg-transparent text-secondary-light dark:text-secondary-dark gap-1 text-sm font-bold transition-colors hover:bg-slate-100 dark:hover:bg-surface-dark">
+<span class="material-symbols-outlined text-base">cancel</span>
+<span class="truncate">취소</span>
+</button>
+</div>
+</div>
+<!-- Processing State -->
+<div class="flex flex-col gap-3">
+<div class="flex flex-wrap gap-2 justify-between">
+<p class="text-base font-medium">project_final_cut.mov (1.2GB)</p>
+<p class="text-sm font-normal text-secondary-light dark:text-secondary-dark">80%</p>
+</div>
+<div class="w-full rounded-full bg-slate-200 dark:bg-border-dark">
+<div class="h-2 rounded-full bg-primary" style="width: 80%;"></div>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-sm font-normal text-secondary-light dark:text-secondary-dark">비디오 처리 중... (2/3 단계)</p>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-3 bg-transparent text-secondary-light dark:text-secondary-dark gap-1 text-sm font-bold transition-colors hover:bg-slate-100 dark:hover:bg-surface-dark">
+<span class="material-symbols-outlined text-base">cancel</span>
+<span class="truncate">취소</span>
+</button>
+</div>
+</div>
+<!-- Success State -->
+<div class="flex flex-col gap-3">
+<div class="flex flex-wrap gap-2 justify-between">
+<p class="text-base font-medium">vacation_reel_2024.mp4 (450MB)</p>
+<p class="text-sm font-bold text-success">완료</p>
+</div>
+<div class="w-full rounded-full bg-slate-200 dark:bg-border-dark">
+<div class="h-2 rounded-full bg-success" style="width: 100%;"></div>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-sm font-normal text-success">처리 완료!</p>
+</div>
+</div>
+<!-- Error State -->
+<div class="flex flex-col gap-3 rounded-lg bg-error/10 p-4 border border-error/50">
+<div class="flex flex-wrap gap-2 justify-between">
+<p class="text-base font-medium">unsupported_file.wmv (25MB)</p>
+<p class="text-sm font-bold text-error">업로드 실패</p>
+</div>
+<div class="w-full rounded-full bg-slate-200 dark:bg-border-dark">
+<div class="h-2 rounded-full bg-error" style="width: 100%;"></div>
+</div>
+<div class="flex items-center justify-between">
+<p class="text-sm font-normal text-error">잘못된 파일 형식입니다. 지원되는 형식을 확인하세요.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

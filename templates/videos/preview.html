@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}미리보기 - FaceBlur{% endblock %}
+
+{% block header %}
+<header class="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-solid border-black/10 dark:border-white/10 px-4 sm:px-6 md:px-10 py-3 bg-background-dark">
+    <div class="flex items-center gap-4 text-white">
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">FaceBlur</h2>
+    </div>
+    <div class="flex flex-1 justify-end gap-2 sm:gap-4">
+        <a href="{% url 'select_faces' video.id %}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-slate-200/50 dark:bg-white/10 text-white text-sm font-bold hover:bg-white/20">
+            <span class="material-symbols-outlined mr-2">arrow_back</span>
+            이전 단계로
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block main_class %}container mx-auto max-w-4xl px-4{% endblock %}
+
+{% block content %}
+<main class="flex-grow py-6">
+    <!-- 제목 -->
+    <div class="flex flex-col gap-2 mb-6">
+        <h1 class="text-white text-3xl font-bold">미리보기 및 저장: {{ video.title }}</h1>
+    </div>
+
+    <!-- 비디오 플레이어 -->
+    <div class="w-full mb-8">
+        <div class="relative rounded-xl overflow-hidden bg-black aspect-video">
+            {% if video.processed_file_url %}
+                <video id="preview-video" class="h-full w-full" controls>
+                    <source src="{{ video.processed_file_url }}" type="video/mp4">
+                    브라우저가 비디오를 지원하지 않습니다.
+                </video>
+            {% else %}
+                <div class="flex items-center justify-center h-full">
+                    <p class="text-white text-lg">처리 중...</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 상태 표시 -->
+    <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between p-4 bg-surface-dark rounded-lg border border-border-dark">
+            <div>
+                <p class="text-white text-base font-medium">처리 상태</p>
+                <p class="text-slate-400 text-sm">{{ video.get_status_display }}</p>
+            </div>
+            {% if video.status == 'processing' %}
+                <div class="flex items-center gap-2">
+                    <div class="w-32 h-2 rounded-full bg-slate-700">
+                        <div class="h-2 rounded-full bg-primary" style="width: {{ video.progress }}%;"></div>
+                    </div>
+                    <p class="text-white text-sm">{{ video.progress }}%</p>
+                </div>
+            {% elif video.status == 'completed' %}
+                <span class="material-symbols-outlined text-success text-3xl">check_circle</span>
+            {% endif %}
+        </div>
+
+        <!-- 상태별 액션 버튼 -->
+        {% if video.status == 'ready' %}
+            <button id="start-processing-btn" class="flex items-center justify-center rounded-lg h-12 px-8 bg-primary text-white text-base font-bold shadow-lg transition-colors hover:bg-primary/90">
+                <span class="material-symbols-outlined mr-2">play_arrow</span>
+                <span class="truncate">비디오 처리 시작</span>
+            </button>
+        {% elif video.status == 'completed' %}
+            <div class="flex flex-col gap-3 p-6 bg-success/10 border border-success/30 rounded-lg">
+                <h3 class="text-success text-xl font-bold">저장이 완료되었습니다!</h3>
+                <div class="flex gap-4">
+                    <a href="{{ video.processed_file_url }}" download class="flex items-center justify-center rounded-lg h-10 px-6 bg-success text-white text-sm font-bold hover:bg-success/90">
+                        <span class="material-symbols-outlined mr-2">download</span>
+                        다운로드
+                    </a>
+                    <a href="{% url 'upload' %}" class="flex items-center justify-center rounded-lg h-10 px-6 bg-white/10 text-white text-sm font-bold hover:bg-white/20">
+                        새로운 비디오 처리하기
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const VIDEO_ID = '{{ video.id }}';
+    const VIDEO_STATUS = '{{ video.status }}';
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/preview.js' %}"></script>
+{% endblock %}

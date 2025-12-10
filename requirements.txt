@@ -1,0 +1,196 @@
+# ============================================================================
+# FaceBlur Project - Python Dependencies
+# ============================================================================
+# 이 파일은 프로젝트에 필요한 모든 Python 패키지를 정의합니다.
+# 설치 방법: pip install -r requirements.txt
+# ============================================================================
+
+# ============================================================================
+# Django Core Framework
+# ============================================================================
+# Django: Python 웹 프레임워크 (4.2 LTS 버전 사용)
+Django==4.2.7
+
+# Django REST Framework: RESTful API 구축을 위한 강력한 툴킷
+# - Serializer: 데이터 직렬화/역직렬화
+# - ViewSets: CRUD API 자동 생성
+# - Authentication: 토큰 기반 인증
+djangorestframework==3.14.0
+
+# Django CORS Headers: 브라우저에서 다른 도메인 API 호출 허용
+# - 프론트엔드와 백엔드가 다른 포트/도메인에서 실행될 때 필수
+django-cors-headers==4.3.1
+
+# ============================================================================
+# 데이터베이스 & 캐싱
+# ============================================================================
+# PostgreSQL 어댑터 (운영 환경에서 사용)
+# - SQLite 대신 PostgreSQL을 사용하여 성능 향상
+psycopg2-binary==2.9.9
+
+# Django Redis: Redis를 Django 캐시 백엔드로 사용
+# - 세션 저장, API 응답 캐싱, Celery 브로커로 활용
+django-redis==5.4.0
+
+# Redis Python 클라이언트
+redis==5.0.1
+
+# ============================================================================
+# AWS Services (S3 파일 저장)
+# ============================================================================
+# Boto3: AWS SDK for Python
+# - S3에 영상 파일 업로드/다운로드
+# - EC2, RDS 등 AWS 서비스 제어
+boto3==1.34.14
+
+# Django Storages: Django에서 S3를 파일 스토리지로 사용
+# - MEDIA_ROOT를 S3 버킷으로 설정 가능
+django-storages==1.14.2
+
+# ============================================================================
+# 비동기 작업 처리 (Celery)
+# ============================================================================
+# Celery: 분산 작업 큐
+# - 영상 처리같은 긴 작업을 백그라운드에서 비동기 실행
+# - Redis를 메시지 브로커로 사용
+celery==5.3.4
+
+# Celery Beat: 주기적 작업 스케줄러
+# - 만료된 파일 자동 삭제 등
+django-celery-beat==2.5.0
+
+# ============================================================================
+# WebSocket 지원 (실시간 통신)
+# ============================================================================
+# Channels: Django에서 WebSocket 지원
+# - 영상 처리 진행률을 실시간으로 브라우저에 전송
+channels==4.0.0
+
+# Daphne: ASGI 서버 (WebSocket을 위한 서버)
+# - Gunicorn은 WSGI만 지원하므로 WebSocket은 Daphne 사용
+daphne==4.0.0
+
+# Channels Redis: Channels의 레이어 백엔드로 Redis 사용
+channels-redis==4.1.0
+
+# ============================================================================
+# HTTP 클라이언트 (FastAPI 통신)
+# ============================================================================
+# HTTPX: 비동기 HTTP 클라이언트
+# - Django에서 FastAPI AI 서버로 HTTP 요청 전송
+# - requests보다 빠르고 async/await 지원
+httpx==0.25.2
+
+# ============================================================================
+# 이미지/비디오 처리
+# ============================================================================
+# Pillow: Python 이미지 라이브러리
+# - 썸네일 생성, 이미지 리사이징
+Pillow==10.1.0
+
+# OpenCV: 컴퓨터 비전 라이브러리
+# - 영상 프레임 추출, 블러 처리
+opencv-python==4.8.1.78
+
+# MoviePy: 영상 편집 라이브러리
+# - 영상 메타데이터 추출 (길이, 해상도, FPS)
+moviepy==1.0.3
+
+# ============================================================================
+# AI/ML 패키지 (Phase 3 - 얼굴 인식)
+# ============================================================================
+# PyTorch: 딥러닝 프레임워크
+# - CUDA 12.1 지원 (GPU 가속)
+# - YOLO, FaceNet 모델 실행
+torch==2.1.2
+torchvision==0.16.2
+
+# FaceNet PyTorch: 얼굴 임베딩 추출
+# - 얼굴 이미지를 512차원 벡터로 변환하여 유사도 비교
+# - MTCNN (얼굴 정렬) + InceptionResnetV1 (임베딩) 포함
+facenet-pytorch==2.5.3
+
+# InsightFace: 얼굴 인식 및 정렬
+# - buffalo_l 모델로 얼굴 감지 및 5-point landmark alignment
+# - AdaFace와 함께 사용하여 정렬된 얼굴 이미지 생성
+insightface==0.7.3
+onnxruntime>=1.16.0  # InsightFace의 ONNX 모델 실행 (CPU 버전)
+
+# Scikit-learn: 머신러닝 라이브러리
+# - DBSCAN 클러스터링으로 동일 인물 그룹화
+scikit-learn==1.3.2
+
+# FINCH: 파라미터 프리 클러스터링 (얼굴 그룹화 최적화)
+# - HAC보다 빠르고 정확한 클러스터링
+# - 완전 자동 (파라미터 조정 불필요)
+finch-clust>=0.1.0
+
+# HDBSCAN: 밀도 기반 클러스터링 (2025 실무 표준)
+# - Faiss HNSW와 결합하여 빠른 k-NN 그래프 생성
+# - 완전 자동 클러스터 수 결정
+hdbscan>=0.8.33
+faiss-cpu>=1.7.4
+
+# Ultralytics: YOLO 구현체
+# - YOLOv8/v11 얼굴 감지 모델 실행 (최신 버전 사용으로 YOLOv11 지원)
+ultralytics
+
+# PyIQA: Image Quality Assessment Library
+# - MANIQA (CVPR 2022) for accurate face quality assessment
+# - No-reference IQA with pre-trained weights
+pyiqa>=0.1.7
+
+# CVLface Dependencies (Face Alignment)
+pyrootutils>=1.0.4  # Project root utilities for CVLface
+timm>=0.9.0  # PyTorch Image Models (for ViT if needed)
+albumentations
+imgaug
+lovely-tensors
+easydict
+scipy
+huggingface-hub>=0.19.0  # For downloading alignment models from HF
+transformers==4.36.0  # For HuggingFace AutoModel (compatible with PyTorch 2.1.2)
+omegaconf>=2.3.0  # For CVLface configuration
+hydra-core>=1.3.0  # For CVLface hydra configs
+
+# ============================================================================
+# 환경 변수 관리
+# ============================================================================
+# Python Decouple: .env 파일에서 환경 변수 로드
+# - AWS 자격증명, 데이터베이스 비밀번호 등을 코드에 하드코딩하지 않고 관리
+python-decouple==3.8
+
+# Python Dotenv: .env 파일 파싱 (대안)
+python-dotenv==1.0.0
+
+# ============================================================================
+# 유틸리티
+# ============================================================================
+# PyJWT: JSON Web Token 생성/검증
+# - API 인증 토큰 발급
+PyJWT==2.8.0
+
+# Requests: HTTP 라이브러리 (동기)
+# - 외부 API 호출 시 사용
+requests==2.31.0
+
+# psutil: 시스템 및 프로세스 모니터링
+# - 메모리 사용량 실시간 모니터링
+# - CPU, 디스크 I/O 추적
+psutil==5.9.6
+
+# ============================================================================
+# 개발 도구 (선택사항)
+# ============================================================================
+# Django Debug Toolbar: 개발 환경에서 SQL 쿼리, 성능 분석
+# django-debug-toolbar==4.2.0
+
+# iPython: 향상된 Python 쉘
+# ipython==8.18.1
+
+# ============================================================================
+# 참고:
+# - 이 파일은 Django 웹 서버용입니다
+# - FastAPI AI 서버는 별도의 requirements.txt를 갖습니다
+# - 설치 후 'pip freeze > requirements-freeze.txt'로 정확한 버전 기록 권장
+# ============================================================================

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>블러처리 하지 않을 얼굴 이미지 선택</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+      body {
+        font-family: 'Noto Sans KR', 'Spline Sans', sans-serif;
+      }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#5b13ec",
+              "background-light": "#f6f6f8",
+              "background-dark": "#161022",
+            },
+            fontFamily: {
+              "display": ["Spline Sans", "Noto Sans KR"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1 justify-center py-5 sm:px-10 md:px-20 lg:px-40">
+<div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-black/10 dark:border-white/10 px-4 sm:px-6 md:px-10 py-3">
+<div class="flex items-center gap-4 text-slate-800 dark:text-white">
+<div class="size-6">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_535)">
+<path clip-rule="evenodd" d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor" fill-rule="evenodd"></path>
+</g>
+<defs>
+<clipPath id="clip0_6_535"><rect fill="white" height="48" width="48"></rect></clipPath>
+</defs>
+</svg>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Video Processor</h2>
+</div>
+<div class="flex flex-1 justify-end gap-2 sm:gap-4 md:gap-8">
+<div class="flex gap-2">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-200/50 dark:bg-white/10 text-slate-600 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-xl">help_outline</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-200/50 dark:bg-white/10 text-slate-600 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-200/50 dark:bg-white/10 text-slate-600 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture with abstract shapes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCe3QMRI52OyWUsW-2cAaNc5z3FKr3Fqan2rWWsP4v2A-BGnEBxkQ7oUF3UJFMYRjJK0fCNXjixENhAM2VmirTraTZNjOcUwERF65poVW5ZMOQ0tOZD14lnj2F43Zsz3pp0ivcHBWk1ZZvoz0eR9ymtCtCowYGGbOK10b7Kc8NiIIKqyx_ConxMDnQ3kcphlb9ooxbLcJR66GtqduerpAKIp-xvV4vPPyTnWr3Lf-unE-42xZI0CIDD3GYhad0sWq0f6esc2RArR1Oc");'></div>
+</div>
+</header>
+<main class="flex-grow">
+<div class="flex flex-wrap justify-between gap-3 p-4 sm:p-6 md:p-8">
+<div class="flex min-w-72 flex-col gap-3">
+<p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">블러처리 하지 않을 얼굴 이미지 선택</p>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">
+                                    1차 처리 후 생성된 여러 이미지 중에서 블러 처리하지 않을 얼굴 이미지를 선택해 주세요.
+                                </p>
+</div>
+</div>
+<div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4 sm:p-6 md:p-8">
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-4 ring-primary shadow-lg" data-alt="Thumbnail of a scenic mountain landscape at sunrise" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDNdb4t6F1zkuZbfjIJved5uUIh2wNsBJf23grZrJofw23XwEuR1IFW7-OYf6VvbL5A3umeilUJ67u9EfHrAf3BdSD7V3nfIPtnz4UEmhIg0KEg5eZf6f90gFOE3hNOGz5rCq6NW9GGXiZw_lv1MeK17khZ8zGiKgXnlGJtujinDU_sJ94n14n2ab54sPora9gTpGMQiyoOmE_gokXrb5i_4KZWQixCldjYpfjBE4vFOyQq9SfreKMNYIqrmlUZD_JVPPbYhCrvtB-2");'></div>
+<div class="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-primary text-white">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a modern city skyline at night" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCNBGyq8jMFLmfkxvRp5zv-Gup0ANxfUHmlMB9VrosZE3xlY9W_psKcHwuLNTVXXZq9TFknjluO3OLzpEdajmACjAo98bDCUueH-P8LRtPcVs4mCfuv5Dt5Qnis4G8ONXCwWfTyKd4sKuNEa6ZcxWAweUhIfV6kKLwEdoajhc1YoVXIOlCf70fBwmnX96fDqfoAL7IuXbcXXkMeQkmTtaR_ifAuo21ZOdT_xjp_3KBIFLQe4-iWmxAs1pytXGEhnNraFUqLPXfDsdJj");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a dense forest with sunlight filtering through trees" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDSOxt9U0R6vHR24YN4LIMxK9Q6Yeu4885iWBhEWPF3_GWk75cXeQCsHJ4W6dwjANFx3puuOOI6G0tsSJX57EHA6bgDC1Q5jfNTlxpEwQnJnhS5pTuuKMUmdH0LHKZZ5GjPCuSKZ5MdhiOmPtA7zPGtTjhoyqwtmjUC1wXIUq3M_8eVtEGiNLxBDxQmEOm5GoKGylxni_TDLruus9Q5jilNqIsJUyRd4lc85EXGvvsp9wewfN3oJSi-zjwQ7Cw0_yey7HzTZqtc53nX");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a calm ocean with a sailboat" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkPHgaIQNIXaNhnpg7NzZbLfMD2BddFxIB6kDnNYH6ZoyDVhRDqFbSHVUiQp5KYnI4ENhBD0pw50tmHX4s6bEApVZTP4ZWB0LynvUwjRLHfuMfUBtfGbGwwSA-rkLyiYKKHPNu2M4xkwNZkhVwZSiK6agSD8pq0BrEDvQJpC88u-Xh-JtwsHvJFiQ-RBRJ5-k1kb6TwaJwSkd9RwgZZya7N3yotdkXfeHBBstqGWzU6s2VJ-p2rXmxBNX4gtjbVL08MJc8RxTog7mm");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of an abstract architectural detail" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuChKrgsCSD1fx47hSlcaDZ1BJzg1MyjrLB1ZrRCWi-7KMzgB8DJjNL-iVI6Hy9rJ7DS6FhidO-Te8M3rW1kKdkCGSjGpv9lairdXR8E3SCg1lD-Lz1FwwtQrYWdRTQMXZZFeWKMOyWBUazLTxu8MP-Adrwc_C34SsOcus4wOKzyPfEYQSGBSLqvEeTigUEmKQaNr8DyOnZno8e4tVw2-2mTmwUjWyo9JjDBfsCtZXGAhmVRTXxjlA81riUhSkX_JPbgKVozGPwDyTcq");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a desert landscape at dusk" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlfkOD0vk1iRz9DDIZeNpJQVSABWgwg3o1QUgTYS1pJszLnY93AbpViDsjO9B2q8MWPyUqQre8oFAHNeY9l8XmTzZwF7_SE5mcBW2nxnIqntyNxnz8wCrkdyGZItUfL0K9MGPhnQXsiiGluweVlVE4MFG1oQ2C5zuVOwU2hbCzm1RGjGl7GYiRjzp-O2R6VtyobOGE14SPrkR2m7a3CzV1l78Sel656b-dvvhMcaEdGhgRABro2YVbPHGwGBh_oHs25VcVb-XlJ2NA");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a colorful abstract pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDWkRJFQUbnE2ptIdcIY0a1OgEEEG8N9L1N26NprnzZnWMuLRwMZOuLzOpgfxkM6ihfgIo9gm-34TXEl6SivI8ZJbrPYAquX4fZcWvhi30ePDxDyTsZslkJmDDMpHvtrDqLSl6chCJKDBQG1ui5681Gagp_Th4hITQUxrB6o86BzIA2dftyDvw4klrmCSLtnKI-YaA4DeV3uOpsAwCvdEpxVIXyMV42hewB-J4Q6DqoRP10cYQspry59niP04tIePmp7bFNKJYvEueF");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a snowy mountain peak" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBSxCNcWpSavfvlaUKagvAjBVYNnkf_Q5-6hLqrx35OC4GmiX1PjcM7XUcoTOgxuTKvcFT2lCFoa85Yo4lckuKDjlr-nw8gyI2T_OIuhau7qbwM__2QYXu8iG3ymeDe8_sNhBqqWyqz3O9U9sQ7Z0Gn5w9_YzNAGVga2_4BZiImHDTknu-MkCmAd-kNgN-QhzZTvxJ5W0AD03daIbhQKgYNig9x2CSs3CVItmq2CvYFh-lN4CH-9v_zoZpC4cTlOZ-G9FsL9FG7MUho");'></div>
+</div>
+<div class="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-200 ease-in-out hover:scale-105">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg ring-2 ring-transparent group-hover:ring-primary/50" data-alt="Thumbnail of a tropical beach with palm trees" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBcdjyiIl2EQ_AAXvoGP6HrXcPk1Wj2EsvpSsPOc8flPJieV8xuhNWoxbioXP_MG_3UgMzIORz6kdY_s20RemOOZnI7hxQgTSdZSWmMdSrsdT35BHhKQtOG-EcF0HOrgn-YgiMEh0KB3zgRU_APBVw45j85_GXNOO9zM5pfuEOZ9107cQzUnBiHOpmXWZ3PXhj4iWsEdWzfGb72VhHAyqm5dvtsvzouswKZ_5XyB-GDovSwpKLldwGt61Kkdg7-c7TndYtsHI0ZFd_F");'></div>
+</div>
+</div>
+</main>
+<footer class="flex px-4 py-6 justify-center">
+<button class="flex min-w-[84px] w-full max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">선택 완료 및 저장</span>
+</button>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</body></html>

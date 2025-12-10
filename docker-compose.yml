@@ -1,0 +1,344 @@
+# ============================================================================
+# FaceBlur Project - Docker Compose 설정 (개발 환경)
+# ============================================================================
+# 이 파일은 로컬 개발 환경에서 여러 서비스를 한 번에 실행합니다.
+#
+# 사용 방법:
+#   시작: docker-compose up -d
+#   중지: docker-compose down
+#   로그: docker-compose logs -f [서비스명]
+#   재빌드: docker-compose up -d --build
+#
+# 포함된 서비스:
+#   - db: PostgreSQL 데이터베이스
+#   - redis: Redis (캐시 & Celery 브로커)
+#   - django: Django 웹 서버
+#   - celery_worker: Celery 비동기 작업 워커 (Phase 4에서 활성화)
+# ============================================================================
+
+version: '3.9'
+
+# ============================================================================
+# 서비스 정의
+# ============================================================================
+services:
+
+  # ==========================================================================
+  # PostgreSQL 데이터베이스
+  # ==========================================================================
+  # - Django 데이터 저장용 (Video, Face, User 등)
+  # - 운영 환경에서는 AWS RDS로 대체
+  db:
+    image: postgres:15-alpine
+    container_name: faceblur_db
+
+    # 환경 변수
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-faceblur_db} # 데이터베이스 이름
+      POSTGRES_USER: ${POSTGRES_USER:-postgres} # 사용자명
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123} # 비밀번호 (.env에서 설정)
+
+    # 볼륨 (데이터 영구 저장)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # 포트 노출 (호스트:컨테이너)
+    ports:
+      - "5432:5432"
+
+    # 헬스체크 (서비스가 정상 작동하는지 확인)
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # 네트워크
+    networks:
+      - faceblur_network
+
+  # ==========================================================================
+  # Redis 캐시 & 메시지 브로커
+  # ==========================================================================
+  # - Django 캐시로 사용 (API 응답 캐싱)
+  # - Celery 메시지 브로커로 사용 (작업 큐)
+  # - 세션 저장소로 사용
+  # - 운영 환경에서는 AWS ElastiCache로 대체
+  redis:
+    image: redis:7-alpine
+    container_name: faceblur_redis
+
+    # 명령어 옵션
+    command: redis-server --appendonly yes
+
+    # 볼륨 (데이터 영구 저장)
+    volumes:
+      - redis_data:/data
+
+    # 포트 노출
+    ports:
+      - "6379:6379"
+
+    # 헬스체크
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - faceblur_network
+
+  # ==========================================================================
+  # FastAPI AI 서버
+  # ==========================================================================
+  # - AI 모델 추론 전용 마이크로서비스
+  # - YOLO v11s 얼굴 감지
+  # - AdaFace ViT 임베딩 추출
+  # - NIMA 품질 평가
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+
+    container_name: faceblur_fastapi
+
+    # FastAPI 서버 실행 (단일 워커 - GPU 사용)
+    command: uvicorn fastapi_ai.main:app --host 0.0.0.0 --port 8001 --workers 1
+
+    # 볼륨 (코드 및 AI 모델 파일)
+    volumes:
+      - .:/app
+      - ./fastapi_ai:/app/fastapi_ai
+      - ./apps/videos/weights:/app/apps/videos/weights:ro # AdaFace 모델 가중치 (읽기 전용)
+      - ./models:/app/models:ro # YOLO 모델 파일 (읽기 전용)
+      - ./media:/app/media # 비디오 파일 접근 (Django와 공유)
+
+    # 포트 노출 (내부 통신용 - 외부 노출 불필요)
+    ports:
+      - "8001:8001"
+
+    # GPU 지원 (AI 모델 추론용)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+    # 환경 변수
+    environment:
+      - PYTHONUNBUFFERED=1
+
+    # 의존성 (Redis만 필요 - DB 불필요)
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    # 네트워크
+    networks:
+      - faceblur_network
+
+    # 재시작 정책
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Django 웹 서버
+  # ==========================================================================
+  # - 사용자 관리, 웹 UI, API 엔드포인트 제공
+  # - Gunicorn WSGI 서버로 실행
+  django:
+    # Dockerfile.django 사용 (아래에서 생성)
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+
+    container_name: faceblur_django
+
+    # 시작 명령어
+    # - 마이그레이션 실행
+    # - Static 파일 수집
+    # - Gunicorn으로 Django 실행 (4개 워커)
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn face_blur_web.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 3600 --reload"
+
+    # 볼륨 (코드 동기화 - 개발 중 코드 변경 시 자동 반영)
+    volumes:
+      - .:/app # 현재 디렉토리를 /app에 마운트
+      - static_volume:/app/staticfiles # Static 파일
+      - ./media:/app/media # 업로드된 미디어 파일 (로컬 폴더 바인딩)
+      - ./models/yolov11s-face.pt:/app/models/yolov11s-face.pt:ro # YOLO 모델 파일 (읽기 전용)
+
+    # 포트 노출
+    ports:
+      - "8000:8000"
+
+    # GPU 지원 (NVIDIA Docker 필요)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+    # 환경 변수
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,unexceptional-lynwood-cognominally.ngrok-free.dev
+      - CSRF_TRUSTED_ORIGINS=https://unexceptional-lynwood-cognominally.ngrok-free.dev
+
+      # 데이터베이스 연결
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${POSTGRES_DB:-faceblur_db}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres123}
+      - DB_HOST=db # Docker 네트워크에서 'db' 서비스명으로 접근
+      - DB_PORT=5432
+
+      # Redis 연결
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+      # FastAPI 연결 (Phase 3에서 활성화)
+      - FASTAPI_BASE_URL=http://fastapi:8001
+
+      # S3 설정 (개발 환경에서는 로컬 파일 시스템 사용)
+      - USE_S3=False
+      # - AWS_ACCESS_KEY_ID=your-key
+      # - AWS_SECRET_ACCESS_KEY=your-secret
+      # - AWS_STORAGE_BUCKET_NAME=faceblur-videos
+      # - AWS_REGION=ap-northeast-2
+
+      # 의존성 (db, redis가 먼저 시작되어야 함)
+      # FastAPI 의존성은 빌드 후 추가
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      # fastapi:
+      #   condition: service_started
+
+    # 네트워크
+    networks:
+      - faceblur_network
+
+    # 재시작 정책
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Celery Worker (비동기 작업 처리)
+  # ==========================================================================
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+
+    container_name: faceblur_celery_worker
+
+    # Celery 워커 실행
+    # --pool=solo: CUDA 호환성을 위해 fork 대신 solo pool 사용
+    # --max-tasks-per-child=1: 작업 1개 처리 후 워커 재시작 (메모리 누수 방지)
+    # --prefetch-multiplier=1: 한 번에 1개 작업만 가져옴
+    command: celery -A face_blur_web worker -l info --pool=solo --max-tasks-per-child=1 --prefetch-multiplier=1
+
+    volumes:
+      - .:/app
+      - ./media:/app/media
+      - ./models/yolov11s-face.pt:/app/models/yolov11s-face.pt:ro # YOLO 모델 파일
+      - ./models/ckpt_koniq10k.pt:/root/.cache/torch/hub/checkpoints/ckpt_koniq10k.pt:ro # MANIQA 모델 파일
+
+    # 메모리 제한 (Docker 레벨)
+    mem_limit: 8g
+    mem_reservation: 6g
+
+    # GPU 지원 (얼굴 인식 AI 모델 실행용)
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 6G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${POSTGRES_DB:-faceblur_db}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres123}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FASTAPI_BASE_URL=http://fastapi:8001
+
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    networks:
+      - faceblur_network
+
+    restart: unless-stopped
+
+# ============================================================================
+# 볼륨 정의 (데이터 영구 저장)
+# ============================================================================
+volumes:
+  # PostgreSQL 데이터
+  postgres_data:
+    driver: local
+
+  # Redis 데이터
+  redis_data:
+    driver: local
+
+  # Django Static 파일 (CSS, JS, 이미지)
+  static_volume:
+    driver: local
+
+# ============================================================================
+# 네트워크 정의
+# ============================================================================
+networks:
+  faceblur_network:
+    driver: bridge
+
+# ============================================================================
+# 사용 팁:
+#
+# 1. 첫 실행 시:
+#    docker-compose up -d --build
+#
+# 2. 로그 확인:
+#    docker-compose logs -f django
+#
+# 3. Django 쉘 접속:
+#    docker-compose exec django python manage.py shell
+#
+# 4. 마이그레이션:
+#    docker-compose exec django python manage.py makemigrations
+#    docker-compose exec django python manage.py migrate
+#
+# 5. 슈퍼유저 생성:
+#    docker-compose exec django python manage.py createsuperuser
+#
+# 6. 모든 서비스 중지:
+#    docker-compose down
+#
+# 7. 볼륨까지 삭제 (데이터베이스 초기화):
+#    docker-compose down -v
+#
+# ============================================================================

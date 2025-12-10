@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}얼굴 선택 - FaceBlur{% endblock %}
+
+{% block header %}
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-black/10 dark:border-white/10 px-4 sm:px-6 md:px-10 py-3">
+    <div class="flex items-center gap-4 text-slate-800 dark:text-white">
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">FaceBlur</h2>
+    </div>
+    <div class="flex flex-1 justify-end gap-2 sm:gap-4">
+        <a href="{% url 'upload' %}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-slate-200/50 dark:bg-white/10 text-slate-600 dark:text-white text-sm font-bold hover:bg-slate-300 dark:hover:bg-white/20">
+            <span class="material-symbols-outlined mr-2">arrow_back</span>
+            처음으로
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block main_class %}container mx-auto max-w-[960px] px-4{% endblock %}
+
+{% block content %}
+<main class="flex-grow py-6">
+    <div class="flex flex-wrap justify-between gap-3 mb-6">
+        <div class="flex min-w-72 flex-col gap-3">
+            <p class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
+                블러처리 하지 않을 얼굴 선택
+            </p>
+            <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">
+                감지된 얼굴 중 블러 처리하지 않을 얼굴을 선택하세요. (기본: 모두 블러 처리)
+            </p>
+        </div>
+    </div>
+
+    <!-- 얼굴 썸네일 그리드 -->
+    <div id="faces-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+        <!-- JavaScript로 동적 로드 -->
+        <div class="col-span-full flex justify-center items-center py-12">
+            <p class="text-slate-500 dark:text-slate-400">얼굴 목록을 불러오는 중...</p>
+        </div>
+    </div>
+
+    <!-- 제출 버튼 -->
+    <div class="flex justify-center gap-4">
+        <button id="submit-btn" class="flex items-center justify-center rounded-lg h-12 px-8 bg-primary text-white text-base font-bold shadow-lg transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <span class="truncate">선택 완료 및 다음 단계로</span>
+        </button>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 현재 비디오 ID를 JavaScript에 전달
+    const VIDEO_ID = '{{ video.id }}';
+</script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/select-faces.js' %}"></script>
+{% endblock %}

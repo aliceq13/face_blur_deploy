@@ -1,0 +1,149 @@
+# ============================================================================
+# FaceBlur Project - Django Web Server Dockerfile
+# ============================================================================
+# 이 Dockerfile은 Django 웹 서버를 위한 컨테이너 이미지를 정의합니다.
+#
+# 기존 Dockerfile은 FastAPI AI 서버용 (PyTorch + CUDA)
+# 이 Dockerfile.django는 Django 웹 서버용 (경량화)
+# ============================================================================
+
+# ============================================================================
+# Stage 1: 베이스 이미지
+# ============================================================================
+# Python 3.11 공식 이미지 (Debian 기반, slim 버전으로 경량화)
+FROM python:3.11-slim
+
+# ============================================================================
+# 환경 변수 설정
+# ============================================================================
+# Python 출력 버퍼링 비활성화 (로그를 즉시 볼 수 있음)
+ENV PYTHONUNBUFFERED=1
+
+# pip 업그레이드 경고 무시
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Python 바이트코드 생성 비활성화 (이미지 크기 감소)
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# 타임존 설정
+ENV TZ=Asia/Seoul
+
+# ============================================================================
+# 시스템 패키지 설치
+# ============================================================================
+# 필수 시스템 라이브러리 설치
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # PostgreSQL 클라이언트 라이브러리 (psycopg2 설치에 필요)
+    libpq-dev \
+    # GCC 컴파일러 (일부 Python 패키지 빌드에 필요)
+    gcc \
+    g++ \
+    # Git (버전 관리, 일부 패키지 설치에 필요)
+    git \
+    # Python 개발 헤더 (C 확장 모듈 빌드에 필요 - InsightFace 등)
+    python3-dev \
+    # 이미지 처리 라이브러리 (Pillow에 필요)
+    libjpeg-dev \
+    zlib1g-dev \
+    # FFmpeg (영상 처리에 필요)
+    ffmpeg \
+    # OpenCV 의존성 (libgl1-mesa-glx는 더 이상 사용되지 않음, libgl1으로 변경)
+    libgl1 \
+    libglib2.0-0 \
+    # 타임존 설정
+    tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    # 캐시 정리 (이미지 크기 감소)
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================================
+# 작업 디렉토리 설정
+# ============================================================================
+WORKDIR /app
+
+# ============================================================================
+# Python 의존성 설치
+# ============================================================================
+# requirements.txt를 먼저 복사 (Docker 레이어 캐싱 최적화)
+# - requirements.txt가 변경되지 않으면 이 레이어는 캐시됨
+# - 코드 변경 시 의존성 재설치를 방지
+COPY requirements.txt /app/
+
+# pip 업그레이드 및 빌드 도구 설치
+RUN pip install --upgrade pip setuptools wheel
+
+# InsightFace 빌드를 위한 사전 패키지 설치 (numpy, cython 필수)
+RUN pip install --no-cache-dir numpy cython
+
+# PyTorch with CUDA 12.1 support (GPU 가속)
+# - torch와 torchvision을 먼저 설치 (CUDA 버전 명시)
+# - pip index를 사용하여 CUDA 빌드 다운로드
+RUN pip install --no-cache-dir \
+    torch==2.1.2 \
+    torchvision==0.16.2 \
+    --index-url https://download.pytorch.org/whl/cu121
+
+# Python 패키지 설치
+# --no-cache-dir: pip 캐시 저장 안 함 (이미지 크기 감소)
+# torch와 torchvision은 이미 설치했으므로 skip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Gunicorn 설치 (Django WSGI 서버)
+RUN pip install --no-cache-dir gunicorn==21.2.0
+
+# ============================================================================
+# 애플리케이션 코드 복사
+# ============================================================================
+# 모든 프로젝트 파일을 /app으로 복사 (CVLface 포함)
+COPY . /app/
+
+# CVLface를 /app/CVLface에서 사용 (로컬 복사본)
+# 추가로 /libs/CVLface에도 백업 (볼륨 마운트 시 사용)
+RUN if [ ! -d /app/CVLface ]; then \
+        git clone https://github.com/mk-minchul/CVLface.git /app/CVLface; \
+    fi
+
+# PYTHONPATH에 CVLface 추가 (로컬 버전 우선)
+ENV PYTHONPATH=/app/CVLface:/app:$PYTHONPATH
+
+# ============================================================================
+# Static 파일 디렉토리 생성
+# ============================================================================
+# Django collectstatic 명령을 위한 디렉토리 생성
+RUN mkdir -p /app/staticfiles /app/media
+
+
+
+# ============================================================================
+# 포트 노출
+# ============================================================================
+# Django 서버 포트 (8000)
+EXPOSE 8000
+
+# ============================================================================
+# 엔트리포인트 스크립트 (선택사항)
+# ============================================================================
+# 향후 마이그레이션 자동화 등을 위해 엔트리포인트 스크립트 사용 가능
+# COPY docker-entrypoint.sh /app/
+# RUN chmod +x /app/docker-entrypoint.sh
+# ENTRYPOINT ["/app/docker-entrypoint.sh"]
+
+# ============================================================================
+# 기본 실행 명령어
+# ============================================================================
+# docker-compose.yml에서 override 됨
+# 단독 실행 시: docker run faceblur-django
+CMD ["gunicorn", "face_blur_web.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
+
+# ============================================================================
+# 빌드 방법:
+#   docker build -t faceblur-django -f Dockerfile.django .
+#
+# 실행 방법:
+#   docker run -p 8000:8000 faceblur-django
+#
+# 하지만 일반적으로 docker-compose를 사용합니다:
+#   docker-compose up -d --build
+# ============================================================================

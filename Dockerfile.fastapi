@@ -1,0 +1,69 @@
+# ============================================================================
+# Dockerfile for FastAPI AI Service
+# ============================================================================
+# GPU-enabled AI model inference server
+# - YOLO v11s Face Detection
+# - AdaFace ViT Embedding Extraction
+# - NIMA Quality Assessment
+# ============================================================================
+
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
+# 환경 변수 설정
+ENV PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1
+
+# 시스템 패키지 업데이트 및 Python 3.11 설치
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3-pip \
+    python3.11-dev \
+    libopencv-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python 기본 버전 설정
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
+# pip 업그레이드
+RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+
+# 작업 디렉토리 생성
+WORKDIR /app
+
+# FastAPI 의존성 설치 (먼저 설치하여 캐싱 최적화)
+COPY fastapi_ai/requirements.txt /app/fastapi_ai/requirements.txt
+RUN pip3 install --no-cache-dir -r /app/fastapi_ai/requirements.txt
+
+# 프로젝트 파일 복사
+COPY fastapi_ai/ /app/fastapi_ai/
+COPY apps/videos/adaface_wrapper.py /app/apps/videos/adaface_wrapper.py
+COPY apps/videos/maniqa_wrapper.py /app/apps/videos/maniqa_wrapper.py
+COPY apps/videos/face_aligner.py /app/apps/videos/face_aligner.py
+COPY apps/videos/__init__.py /app/apps/videos/__init__.py
+
+# AI 모델 가중치 파일은 볼륨으로 마운트
+# (docker-compose.yml에서 설정)
+# - /app/models/yolov11s-face.pt
+# - /app/apps/videos/weights/adaface_vit_base_kprpe_webface12m.pt
+
+# 포트 노출
+EXPOSE 8001
+
+# 헬스체크 (FastAPI /health 엔드포인트)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python3 -c "import requests; requests.get('http://localhost:8001/health')"
+
+# FastAPI 서버 실행
+# --host 0.0.0.0: 모든 인터페이스에서 접속 허용
+# --port 8001: FastAPI 포트
+# --workers 1: GPU 사용 시 단일 워커 (CUDA 멀티프로세스 이슈 방지)
+CMD ["uvicorn", "fastapi_ai.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "1"]
